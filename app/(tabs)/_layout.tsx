@@ -1,51 +1,106 @@
-import { Tabs } from "expo-router";
-import React from "react";
-import { Platform } from "react-native";
+// app/_layout.tsx
+import {
+  Poppins_400Regular,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  useFonts,
+} from "@expo-google-fonts/poppins";
+import { LinearGradient } from "expo-linear-gradient";
+import { Href, Stack, usePathname, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { GameProvider } from "@/src/store/GameContext";
+import { colors } from "@/src/theme";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const tint = Colors[colorScheme ?? "light"].tint;
+import { AuthProvider, useAuth } from "../auth/AuthContext";
+
+function CenterSpinner() {
+  return (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <ActivityIndicator color={colors.text} />
+    </View>
+  );
+}
+
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (user === undefined) return; // still resolving session
+
+    const inAuth = pathname.startsWith("/auth");
+    const isLandingOrIndex =
+      pathname === "/landing" || pathname === "/" || pathname === "/index";
+
+    if (!user) {
+      // Logged out: allow /landing and /auth/*
+      if (!isLandingOrIndex && !inAuth) {
+        router.replace("/landing" as Href);
+      }
+    } else {
+      // Logged in: keep user out of /landing and /auth/*
+      if (isLandingOrIndex || inAuth) {
+        router.replace("/(tabs)" as Href);
+      }
+    }
+  }, [user, pathname]);
+
+  if (user === undefined) return <CenterSpinner />;
+  return <>{children}</>;
+}
+
+export default function RootLayout() {
+  const [loaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+  if (!loaded) return null;
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,                       // Header comes from root Stack (gives you back button on pushed screens)
-        tabBarActiveTintColor: tint,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: { position: "absolute" },         // transparent to show blur
-          default: {},
-        }),
-        tabBarLabelStyle: { fontWeight: "600" },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
+    <AuthProvider>
+      <GameProvider>
+        {/* Gradient app background */}
+        <LinearGradient
+          colors={["#0B0A0F", "#101322", "#0B0A0F"]}
+          start={{ x: 0.1, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ flex: 1 }}
+        >
+          <View style={{ flex: 1, backgroundColor: "transparent" }}>
+            <StatusBar style="light" />
+            <AuthGate>
+              <Stack
+                screenOptions={{
+                  headerTintColor: colors.text,
+                  headerTitleStyle: { color: colors.text, fontFamily: "Poppins_700Bold" },
+                  headerStyle: { backgroundColor: "transparent" },
+                  contentStyle: { backgroundColor: "transparent" },
+                }}
+              >
+                {/* Public / entry screens */}
+                <Stack.Screen name="landing" options={{ headerShown: false }} />
+                <Stack.Screen name="index" options={{ headerShown: false }} />
 
-      {/* You can keep this as “Explore” or rename to “Quests” later */}
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+                {/* App */}
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="quest" options={{ title: "Quest" }} />
+                <Stack.Screen name="result" options={{ title: "Result" }} />
+                <Stack.Screen name="chat" options={{ title: "Chat" }} />
+                <Stack.Screen name="leaderboard" options={{ title: "Leaderboard" }} />
+
+                {/* Auth screens */}
+                <Stack.Screen name="auth/login" options={{ title: "Login" }} />
+                <Stack.Screen name="auth/register" options={{ title: "Create account" }} />
+              </Stack>
+            </AuthGate>
+          </View>
+        </LinearGradient>
+      </GameProvider>
+    </AuthProvider>
   );
 }
