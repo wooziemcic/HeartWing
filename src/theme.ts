@@ -1,31 +1,37 @@
+// src/theme.ts
 export const colors = {
-  bg: "#0B0A0F",              // deep charcoal
-  bgElevated: "#15131D",
-  card: "#1C1826",
-  text: "#F5F4FA",
-  textDim: "#C7C5D0",
-  primary: "#DC21B8",         // neon pink
-  accent: "#4AC0FC",          // neon blue
-  surface: "#231C31",
-  border: "#2E2840",
+  bg: "#0A0B0E",
+  card: "#171922",
+  surface: "#10131A",
+  border: "#232737",
+  text: "#FFFFFF",
+  dim: "rgba(255,255,255,0.75)",
+  // accents
+  accent: "#E847AE",         // pink/magenta
+  accent2: "#4AC0FF",        // cyan for verified
+  warn: "#F2B01E",           // warm yellow
+  like: "#E847AE",
+  pass: "#6B7280",
 };
 
-export const radii = { md: 14, lg: 20, xl: 28 };
-export const space = { xs: 6, sm: 10, md: 14, lg: 18, xl: 24 };
+export const space = {
+  xs: 6, sm: 10, md: 14, lg: 20, xl: 28, xxl: 40,
+};
 
-export const shadows = {
-  glowPink: {
-    shadowColor: "#DC21B8",
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  glowBlue: {
-    shadowColor: "#4AC0FC",
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+export const radii = {
+  sm: 10, md: 16, lg: 22, xl: 28,
+};
+
+export const gradientCard = ["#241A23", "#13141B"];
+export const gradientBg = ["#0B0A0F", "#121423", "#0B0A0F"];
+
+// Soft, stacked shadow used on cards / floating buttons
+export const shadow = {
+  card: {
+    shadowColor: "#000",
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
   },
 };
